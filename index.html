@@ -12,33 +12,17 @@ html, body {
   height: 100%;
   background: #020617;
   overflow: hidden;
+  cursor: pointer; /* optional: indicate user can click */
 }
 #game { width: 100vw; height: 100vh; background: #000; }
-#loadBtn {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 1rem 2rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  background: #22d3ee;
-  color: #001018;
-  cursor: pointer;
-  z-index: 10;
-}
 </style>
 </head>
 <body>
 
-<button id="loadBtn">Load ROM</button>
-<input type="file" id="romInput" accept=".nes,.smc,.sfc,.gba,.gbc,.gb,.n64,.z64,.v64,.nds,.3ds,.cia,.iso,.bin,.cue,.gen,.smd,.zip,.img,.exe,.cso,.pkg" style="display:none;">
+<input type="file" id="romInput" accept=".nes,.smc,.sfc,.gba,.gbc,.gb,.n64,.z64,.v64,.nds,.3ds,.cia,.iso,.bin,.cue,.gen,.smd,.zip,.img,.exe,.cso,.pkg" style="display:all;">
 <div id="game"></div>
 
 <script>
-const loadBtn = document.getElementById('loadBtn');
 const romInput = document.getElementById('romInput');
 const gameDiv = document.getElementById('game');
 
@@ -50,25 +34,17 @@ const coreMap = {
   '.zip': 'mame', '.img': 'dos', '.exe': 'dos', '.cso': 'psp', '.pkg': 'ps3'
 };
 
-function getCore(filename){
-  const ext = filename.slice(filename.lastIndexOf('.')).toLowerCase();
-  return coreMap[ext] || null;
-}
-
-// Show file picker when button clicked
-loadBtn.addEventListener('click', () => romInput.click());
+// Auto trigger file picker on first click anywhere
+document.body.addEventListener('click', () => romInput.click(), { once: true });
 
 romInput.addEventListener('change', () => {
   const rom = romInput.files[0];
   if (!rom) return;
 
-  const core = getCore(rom.name);
+  const core = coreMap[rom.name.slice(rom.name.lastIndexOf('.')).toLowerCase()];
   if (!core) return alert("Unsupported ROM: " + rom.name);
 
   const romURL = URL.createObjectURL(rom);
-
-  // Hide button once ROM is loading
-  loadBtn.style.display = 'none';
 
   window.EJS_player = "#game";
   window.EJS_core = core;
